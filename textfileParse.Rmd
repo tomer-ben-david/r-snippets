@@ -4,20 +4,37 @@ output: html_notebook
 ---
 
 ```{r}
+
+## Read log file
 mylog <- readLines("./reputation")
 mylog <- mylog[3:length(mylog)] # Remove header line and first line which is not date, start from date.
-head(mylog)
+
 dateLines <- grep(x = mylog, pattern = "^--", value = TRUE)
-dateLines
 dateLinesIdx <- grep(x = mylog, pattern = "^--")
 repLines <- grep(x = mylog, pattern = "^--", value = TRUE, invert = TRUE)
+repLinesIdx <- grep(x = mylog, pattern = "^--", value = FALSE, invert = TRUE)
+
+## Convert to table
 repTable <- read.table(text = repLines)
+
+## Add column names
 names(repTable) <- c("id", "otherid", "points")
+
+## Extract points
 require(stringr)
-repTable$points <- with(repTable, as.numeric(str_extract(repTable$points, "[0-9]+")))
-actionsPerDay <- c(diff(dateLinesIdx) - 1, 2)
-rep(dateLines, times = actionsPerDay)
-sum(actionsPerDay)
-repTable$date <- rep(dateLines, times = actionsPerDay)
+repTable$points <- with(repTable, as.numeric(str_extract(repTable$points, "[0-9]+"))) # (42) -> 42
+
+## How many last actions no final date boundary.
+lastActionsCount <- repLinesIdx[length(repLinesIdx)] - dateLinesIdx[length(dateLinesIdx)]
+
+## Very cool diff per date.
+actionsPerDay <- c(diff(dateLinesIdx) - 1, lastActionsCount)
+
+## Convert to date.
+dates = as.Date(str_extract(dateLines, "\\d{4}-\\d{2}-\\d{2}"))
+
+## Add new column named date.
+repTable$date <- rep(dates, times = actionsPerDay)
+
 repTable
 ```
