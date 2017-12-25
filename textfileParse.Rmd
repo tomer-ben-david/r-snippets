@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 ```{r}
-mylog <- readLines("~/Downloads/reputation")
+mylog <- readLines("./reputation")
 mylog <- mylog[3:length(mylog)] # Remove header line and first line which is not date, start from date.
 head(mylog)
 dateLines <- grep(x = mylog, pattern = "^--", value = TRUE)
